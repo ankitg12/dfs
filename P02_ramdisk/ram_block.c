@@ -17,7 +17,7 @@
 
 static u_int rb_major = 0;
 
-/* 
+/*
  * The internal structure representation of our Device
  */
 static struct rb_device
@@ -66,7 +66,7 @@ static int rb_getgeo(struct block_device *bdev, struct hd_geometry *geo)
 	return 0;
 }
 
-/* 
+/*
  * Actual Data transfer
  */
 static int rb_transfer(struct request *req)
@@ -116,10 +116,12 @@ static int rb_transfer(struct request *req)
 		if (dir == WRITE) /* TODO 4: Write to the device */
 		{
 			//ramdevice_write(/* from sector */, buffer, /* number of sectors */);
+			ramdevice_write(start_sector + sector_offset, buffer, sectors);
 		}
 		else /* TODO 5: Read from the device */
 		{
 			//ramdevice_read(/* from sector */, buffer, /* number of sectors */);
+			ramdevice_read(start_sector + sector_offset, buffer, sectors);
 		}
 		sector_offset += sectors;
 	}
@@ -131,7 +133,7 @@ static int rb_transfer(struct request *req)
 
 	return ret;
 }
-	
+
 /*
  * Represents a block I/O request for us to execute
  */
@@ -163,7 +165,7 @@ static void rb_request(struct request_queue *q)
 	}
 }
 
-/* 
+/*
  * These are the file operations that performed on the ram block device
  */
 static struct block_device_operations rb_fops =
@@ -173,8 +175,8 @@ static struct block_device_operations rb_fops =
 	.release = rb_close,
 	.getgeo = rb_getgeo,
 };
-	
-/* 
+
+/*
  * This is the registration and initialization section of the ram block device
  * driver
  */
@@ -188,7 +190,10 @@ static int __init rb_init(void)
 		return ret;
 	}
 	/* TODO 1: Initialize with DOR memory size */
-	rb_dev.size = 0;
+	/* the size of the memory is returned by the ramdevice_init in ram_device.case
+	hence replace it with the return value*/
+	// rb_dev.size = 0;
+	rb_dev.size = ret;
 
 	/* Get Registered */
 	rb_major = register_blkdev(rb_major, "rb");
@@ -209,12 +214,12 @@ static int __init rb_init(void)
 		ramdevice_cleanup();
 		return -ENOMEM;
 	}
-	
+
 	/*
 	 * Add the gendisk structure
-	 * By using this memory allocation is involved, 
-	 * the minor number we need to pass bcz the device 
-	 * will support this much partitions 
+	 * By using this memory allocation is involved,
+	 * the minor number we need to pass bcz the device
+	 * will support this much partitions
 	 */
 	rb_dev.rb_disk = alloc_disk(RB_MINOR_CNT);
 	if (!rb_dev.rb_disk)
@@ -226,18 +231,21 @@ static int __init rb_init(void)
 		return -ENOMEM;
 	}
 
-	/* TODO 2: Setting the major number */
-	rb_dev.rb_disk->major = 0;
+
+	/* TODO 2: Setting the major number - DONE */
+	// rb_dev.rb_disk->major = 0;
+	rb_dev.rb_disk->major = rb_major;
 	/* Setting the first mior number */
 	rb_dev.rb_disk->first_minor = RB_FIRST_MINOR;
 	/* Initializing the device operations */
 	rb_dev.rb_disk->fops = &rb_fops;
 	/* Driver-specific own internal data */
 	rb_dev.rb_disk->private_data = &rb_dev;
-	/* TODO 3: Setting up the request queue */
+	/* TODO 3: Setting up the request queue -DONE  */
 	rb_dev.rb_disk->queue = NULL;
+	rb_dev.rb_disk->queue = rb_dev.rb_queue;
 	/*
-	 * You do not want partition information to show up in 
+	 * You do not want partition information to show up in
 	 * cat /proc/partitions set this flags
 	 */
 	//rb_dev.rb_disk->flags = GENHD_FL_SUPPRESS_PARTITION_INFO;
