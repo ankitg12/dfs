@@ -63,12 +63,21 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Error getting size of %s: %s\n", argv[1], strerror(errno));
 		return 3;
 	}
-	/* TODO 1: Fill up the partition size in blocks */
-	sb.partition_size = 0;
-	/* TODO 2: Fill up the entry table size in blocks */
-	sb.entry_table_size = 0;
-	/* TODO 3: Fill up the total number of entries */
-	sb.entry_count = 0;
+	/* TODO 1: Fill up the partition size in blocks
+	We got the partition size from the ioctl request BLKGETSIZE64 above.
+	*/
+	sb.partition_size = size;
+
+	/* TODO 2: Fill up the entry table size in blocks
+	The entry_table_size is ratio of the total partition governed by the
+	SFS_ENTRY_RATIO
+	*/
+	sb.entry_table_size = sb.partition_size*SFS_ENTRY_RATIO;
+
+	/* TODO 3: Fill up the total number of entries
+	The number of dentries would be total size entry table divided into blocks of size of each entry
+	*/
+	sb.entry_count = sb.entry_table_size / sb.entry_size;
 	sb.data_block_start = SFS_ENTRY_TABLE_BLOCK_START + sb.entry_table_size;
 
 	printf("Partitioning %Ld byte sized %s ... ", size, argv[1]);
