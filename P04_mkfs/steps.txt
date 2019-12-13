@@ -1,5 +1,12 @@
 Assignment #04
 
+Notes:
+The filesystem design has four parts -> user level, kernel level and hardware level.
+Designing the hardware space:
+The mkfs has to know about the design of our filesystem.
+So we have to write mkfs.mysimplfs
+
+
 Part #1
 a. Have the /dev/rb* from the Assignment #02.
 b. Complete the TODOs in the file mkfs.sfs.c in here.
