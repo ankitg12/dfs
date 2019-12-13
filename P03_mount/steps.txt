@@ -2,8 +2,16 @@ Assignment #03
 
 Part #1
 a. Have the /dev/rb* from the Assignment #02.
+
 b. Try "sudo mount /dev/rb1 /mnt".  Observe the error & Send reason on whatsapp.
+    mount: /dev/rb1 is write-protected, mounting read-only
+    mount: unknown filesystem type '(null)'
+
 c. Do "sudo mkfs.vfat /dev/rb1" and then, "sudo mount /dev/rb1 /mnt". Now, all okay. Why? Send reason to whatsapp.
+
+  [root@localhost P03_mount]# mkfs.vfat /dev/rb1
+  mkfs.fat 3.0.20 (12 Jun 2013)
+
 d. Create a xyz file under /mnt & Check out its permissions.
 e. Try changing the file's permissions to 700 & Re-check its permissions. Post reason for your observation to whatsapp.
 f. Unmount /mnt
