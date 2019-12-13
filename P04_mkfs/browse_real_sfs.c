@@ -15,8 +15,10 @@ byte1_t block[SIMULA_FS_BLOCK_SIZE];
 int init_browsing(int sfs_handle)
 {
 	read(sfs_handle, &sb, sizeof(sfs_super_block_t));
-	/* TODO 1: Check for validity of Simula File System */
-	if (sb.type != 0)
+	/* TODO 1: Check for validity of Simula File System
+	The type expected is SIMULA_FS_TYPE
+	*/
+	if (sb.type != SIMULA_FS_TYPE)
 	{
 		fprintf(stderr, "Invalid SFS detected. Giving up.\n");
 		return -1;
@@ -40,8 +42,10 @@ void sfs_list(int sfs_handle)
 	int i;
 	sfs_file_entry_t fe;
 
-	/* TODO 2A: Seek to the start of file entries table, to check for its existence */
-	lseek(sfs_handle, 0, SEEK_SET);
+	/* TODO 2A: Seek to the start of file entries table, to check for its existence
+	The start of the file entries is located at entry_table_block_start as provided in the super block
+	*/
+	lseek(sfs_handle, sb.entry_table_block_start, SEEK_SET);
 	for (i = 0; i < sb.entry_count; i++)
 	{
 		read(sfs_handle, &fe, sizeof(sfs_file_entry_t));
@@ -61,7 +65,7 @@ void sfs_create(int sfs_handle, char *fn)
 	sfs_file_entry_t fe;
 
 	/* TODO 2B: Seek to the start of file entries table, to check for its existence */
-	lseek(sfs_handle, 0, SEEK_SET);
+	lseek(sfs_handle, sb.entry_table_block_start, SEEK_SET);
 	for (i = 0; i < sb.entry_count; i++)
 	{
 		read(sfs_handle, &fe, sizeof(sfs_file_entry_t));
@@ -83,8 +87,8 @@ void sfs_create(int sfs_handle, char *fn)
 	strncpy(fe.name, fn, SIMULA_FS_FILENAME_LEN);
 	fe.name[SIMULA_FS_FILENAME_LEN] = 0;
 	fe.size = 0;
-	fe.timestamp = 0; /* TODO 3: Fill in the current timestamp */
-	fe.perms = 0; /* TODO 4: Fill in the permissions as "rwx" */
+	fe.timestamp = time(0); /* TODO 3: Fill in the current timestamp ; time - https://linux.die.net/man/2/time - can provide the current timestamp*/
+	fe.perms = 124; /* TODO 4: Fill in the permissions as "rwx" => this is eq to 100 010 001 or 124 */
 	for (i = 0; i < SIMULA_FS_DATA_BLOCK_CNT; i++)
 	{
 		fe.blocks[i] = 0;
